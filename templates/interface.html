@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIMI AI</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .glow-ring {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            animation: glow 2s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            margin-top: 15px; 
+         }
+
+        @keyframes glow {
+            0%   { box-shadow: 0 0 15px #8c00ff; }
+            50%  { box-shadow: 0 0 50px #b600ff; }
+            100% { box-shadow: 0 0 15px #8c00ff; }
+        }
+
+        .title {
+            font-size: 70px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #c56bff;
+            text-shadow: 0 0 20px #be31ff;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .status {
+            margin-top: 10px;
+            opacity: 0.85;
+            font-size: 18px;
+        }
+
+        .console {
+            width: 80%;
+            height: 3000px;
+            margin-top: 0px;
+            overflow-y: auto;
+            border: 1px solid #6d2aff;
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(50, 0, 80, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .msg {
+            font-size: 16px;
+            color: #e1c6ff;
+            margin: 4px 0;
+        }
+
+        .typing {
+            border-right: 2px solid #b47aff;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+            animation: typing 2.5s steps(30, end) forwards, blink 0.6s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent }
+        }
+
+        /* Input Box */
+        #cmd {
+            position: absolute;
+            bottom: 20px;
+            width: 80%;
+            padding: 16px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            background: #7a00ff;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="glow-ring">
+            <h1 class="title">KIMI</h1>
+        </div>
+
+        <div class="status">
+            <p id="time"></p>
+            <p id="date"></p>
+            <p id="battery"></p>
+            <p id="Status">Status: Activated</p>
+        </div>
+
+        <div class="console" id="consoleBox">
+            <div id="messages"></div>
+        </div>
+
+        <!-- ✅ Input + Send Button -->
+        <input type="text" id="cmd" placeholder="Type command...">
+        <button onclick="sendCommand()">Send</button>
+
+    </div>
+
+    <script>
+    function updateClock() {
+        const t = new Date();
+        document.getElementById("time").innerText = t.toLocaleTimeString();
+        document.getElementById("date").innerText = t.toLocaleDateString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function typeMessage(text, delay = 0) {
+        setTimeout(() => {
+            const box = document.getElementById("messages");
+            const div = document.createElement("div");
+            div.className = "msg typing";
+            div.textContent = text;
+            box.appendChild(div);
+
+            box.scrollTop = box.scrollHeight;
+            setTimeout(() => div.classList.remove("typing"), 2500);
+        }, delay);
+    }
+
+    typeMessage("KIMI is online...", 1000);
+    typeMessage("Kon'nichiwa, watashi wa KIMI desu", 4000);
+
+    function sendCommand() {
+        const command = document.getElementById("cmd").value;
+        if (!command) return;
+
+        typeMessage("👤 You: " + command);
+
+        fetch("/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "command=" + command
+        })
+        .then(res => res.json())
+        .then(data => {
+        // display the message
+        typeMessage("🤖 KIMI: " + data.message);
+
+        // if backend sends URL, open in new tab
+        if (data.url) {
+          window.open(data.url, "_blank");
+        }
+        });
+
+
+        document.getElementById("cmd").value = "";
+    }
+</script>
+
+</body>
+</html>

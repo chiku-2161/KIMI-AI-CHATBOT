@@ -1,0 +1,11 @@
+Flask
+google-generativeai
+python-dotenv
+requests
+psutil
+pyautogui
+screen-brightness-control
+gTTS
+pygame
+google-auth-oauthlib
+google-api-python-client
