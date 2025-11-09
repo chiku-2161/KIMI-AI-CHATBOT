@@ -7,7 +7,6 @@ import requests
 import webbrowser
 import psutil
 import google.generativeai as genai
-import musiclibray
 from dotenv import load_dotenv
 
 load_dotenv()  # Load the .env  file
@@ -17,12 +16,6 @@ genai.configure(api_key=GENAI_KEY)
 
 model = genai.GenerativeModel("models/gemini-flash-latest")
 
-try:
-    from gtts import gTTS
-    import pygame
-except Exception:
-    gTTS = None
-    pygame = None
 
 try:
     from google_auth_oauthlib.flow import InstalledAppFlow
@@ -219,3 +212,4 @@ if __name__ == "__main__":
             break
 
         print(processCommand(cmd))  
+
