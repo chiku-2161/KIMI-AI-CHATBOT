@@ -6,8 +6,6 @@ import base64
 import requests
 import webbrowser
 import psutil
-import pyautogui
-import screen_brightness_control as sbc
 import google.generativeai as genai
 import musiclibray
 from dotenv import load_dotenv
@@ -56,13 +54,6 @@ def aiprocess(command: str) -> str:
     except Exception as e:
         return f"AI error: {str(e)}"
 
-def take_screenshot() -> str:
-    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    folder = "Screenshots"
-    os.makedirs(folder, exist_ok=True)
-    filepath = os.path.join(folder, f"screenshot_{now}.png")
-    pyautogui.screenshot().save(filepath)
-    return f"Screenshot saved: {filepath}"
 
 def get_battery_percentage() -> str:
     try:
@@ -75,34 +66,6 @@ def get_battery_percentage() -> str:
         return f"Battery: {percentage}% ({status})"
     except Exception as e:
         return f"Could not read battery: {e}"
-
-def increase_brightness() -> str:
-    try:
-        current = sbc.get_brightness()[0] if hasattr(sbc, "get_brightness") else sbc.get_brightness()
-        new = min(current + 10, 100)
-        sbc.set_brightness(new)
-        return f"Brightness increased to {new}%"
-    except Exception as e:
-        return f"Failed to increase brightness: {e}"
-
-def decrease_brightness() -> str:
-    try:
-        current = sbc.get_brightness()[0] if hasattr(sbc, "get_brightness") else sbc.get_brightness()
-        new = max(current - 10, 0)
-        sbc.set_brightness(new)
-        return f"Brightness decreased to {new}%"
-    except Exception as e:
-        return f"Failed to decrease brightness: {e}"
-
-def set_brightness(value: int) -> str:
-    try:
-        level = int(value)
-        if not (0 <= level <= 100):
-            return "Brightness must be between 0 and 100."
-        sbc.set_brightness(level)
-        return f"Brightness set to {level}%"
-    except Exception as e:
-        return f"Failed to set brightness: {e}"
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
@@ -211,37 +174,9 @@ def processCommand(command: str) -> dict:
 
         if "tell me the news" in c or "news" == c:
             return {"message": read_top_news()}
-
-        # Screenshot
-        if "take screenshot" in c or "screenshot" in c:
-            return {"message": take_screenshot()}
-
         # Battery
         if "battery" in c:
             return {"message": get_battery_percentage()}
-
-        # Brightness controls
-        if "increase brightness" in c or "increase_brightness" in c:
-            return {"message": increase_brightness()}
-
-        if "decrease brightness" in c or "decrease_brightness" in c:
-            return {"message": decrease_brightness()}
-
-        if c.startswith("brightness "):
-            parts = c.split()
-            if len(parts) >= 2 and parts[1].isdigit():
-                return {"message": set_brightness(int(parts[1]))}
-            else:
-                return {"message": "Please provide brightness like: brightness 50"}
-
-        # System Commands
-        if "shut down my system" in c or "shutdown" == c:
-            os.system("shutdown /s /t 1")
-            return {"message": "Shutting down system."}
-
-        if "restart" in c:
-            os.system("shutdown /r /t 1")
-            return {"message": "Restarting system."}
 
         # Email
         if "send email" in c or "send an email" in c:
@@ -282,4 +217,5 @@ if __name__ == "__main__":
         if cmd in ("quit", "exit"):
             print("Bye.")
             break
+
         print(processCommand(cmd))  
